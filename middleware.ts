@@ -2,7 +2,15 @@ import { type NextRequest } from "next/server";
 import { updateSession } from "@/utils/supabase/middleware";
 
 export async function middleware(request: NextRequest) {
-  return await updateSession(request);
+  // return await updateSession(request);
+  const res = await updateSession(request);
+
+  if (request.nextUrl.pathname.startsWith('/api/proxy-to-edge/')) {
+    res.headers.set('Access-Control-Allow-Origin', 'http://localhost:3000');
+    res.headers.set('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+    res.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+    res.headers.set('Access-Control-Allow-Credentials', 'true');
+  }
 }
 
 export const config = {

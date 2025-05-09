@@ -20,11 +20,17 @@ export default async function DashboardPage() {
       {/* <h1>Welcome to the Dashboard</h1> */}
       {/* <SignOutButton /> */}
       <div className="space-y-2">
-        <Link href="/product/register">
-          <Button>商品登録ページへ</Button>
+        <Link href="/dummy_product/register">
+          <Button>商品登録</Button>
         </Link>
-        <Link href="/product/list">
-          <Button>商品一覧ページへ</Button>
+        <Link href="/dummy_product/list">
+          <Button>商品一覧</Button>
+        </Link>
+        <Link href="/edge_test">
+          <Button>エッジ関数テスト</Button>
+        </Link>
+        <Link href="/mock_test">
+          <Button>モックテスト</Button>
         </Link>
       </div>
     </div>

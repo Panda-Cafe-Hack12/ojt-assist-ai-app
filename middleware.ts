@@ -5,7 +5,9 @@ export async function middleware(request: NextRequest) {
   // return await updateSession(request);
   const res = await updateSession(request);
 
-  if (request.nextUrl.pathname.startsWith('/api/proxy-to-edge/')) {
+  // if (request.nextUrl.pathname.startsWith('/api/proxy-to-edge/')) {
+  if (request.nextUrl.pathname.startsWith('/api/')) {
+
     res.headers.set('Access-Control-Allow-Origin', 'http://localhost:3000');
     res.headers.set('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
     res.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');

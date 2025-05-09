@@ -32,6 +32,9 @@ export default async function DashboardPage() {
         <Link href="/mock_test">
           <Button>モックテスト</Button>
         </Link>
+        <Link href="/dashboard/organizations">
+          <Button>組織登録ページへ</Button>
+        </Link>
       </div>
     </div>
   );

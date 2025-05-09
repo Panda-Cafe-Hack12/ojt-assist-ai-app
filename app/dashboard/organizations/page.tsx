@@ -1,0 +1,51 @@
+"use client";
+import { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Checkbox } from '@/components/ui/checkbox';
+import { createClient } from '@/utils/supabase/client';
+
+export default function OrganizationRegisterPage() {
+  const [name, setName] = useState('');
+  const [knowledgeRepo, setKnowledgeRepo] = useState('');
+  const [isDelete, setIsDelete] = useState(false);
+  const [message, setMessage] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setMessage('');
+    const supabase = createClient();
+    const { error } = await supabase.from('organizations').insert([
+      { name, knowledge_repo: knowledgeRepo, is_delete: isDelete }
+    ]);
+    if (error) {
+      setMessage('登録に失敗しました: ' + error.message);
+    } else {
+      setMessage('登録が完了しました');
+      setName('');
+      setKnowledgeRepo('');
+      setIsDelete(false);
+    }
+    setLoading(false);
+  };
+
+  return (
+    <div className="flex flex-col items-center justify-center min-h-screen">
+      <h2 className="text-xl font-bold mb-4">組織登録</h2>
+      <form onSubmit={handleSubmit} className="space-y-4 w-full max-w-md">
+        <div>
+          <label className="block mb-1 font-medium">組織名</label>
+          <Input value={name} onChange={e => setName(e.target.value)} required />
+        </div>
+        <div>
+          <label className="block mb-1 font-medium">ナレッジ格納先URL</label>
+          <Input value={knowledgeRepo} onChange={e => setKnowledgeRepo(e.target.value)} required />
+        </div>
+        <Button type="submit" disabled={loading}>{loading ? '登録中...' : '登録'}</Button>
+        {message && <div className="mt-2 text-center text-sm">{message}</div>}
+      </form>
+    </div>
+  );
+} 

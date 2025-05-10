@@ -3,7 +3,6 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
-import { createClient } from '@/utils/supabase/client';
 
 export default function OrganizationRegisterPage() {
   const [name, setName] = useState('');
@@ -11,22 +10,30 @@ export default function OrganizationRegisterPage() {
   const [isDelete, setIsDelete] = useState(false);
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setMessage('');
-    const supabase = createClient();
-    const { error } = await supabase.from('organizations').insert([
-      { name, knowledge_repo: knowledgeRepo, is_delete: isDelete }
-    ]);
-    if (error) {
-      setMessage('登録に失敗しました: ' + error.message);
-    } else {
-      setMessage('登録が完了しました');
-      setName('');
-      setKnowledgeRepo('');
-      setIsDelete(false);
+    setError('');
+    try {
+      const res = await fetch('/api/organizations', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, knowledge_repo: knowledgeRepo, is_delete: isDelete }),
+      });
+      const result = await res.json();
+      if (!res.ok) {
+        setMessage('登録に失敗しました: ' + (result.message || '')); 
+      } else {
+        setMessage('登録が完了しました');
+        setName('');
+        setKnowledgeRepo('');
+        setIsDelete(false);
+      }
+    } catch (err) {
+      setMessage('登録処理でエラーが発生しました');
     }
     setLoading(false);
   };

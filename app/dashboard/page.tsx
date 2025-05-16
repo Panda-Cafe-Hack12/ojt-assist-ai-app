@@ -30,10 +30,10 @@ export default async function DashboardPage() {
         </Link>
       </div>
       <div className="mt-4 flex justify-center gap-4">
-        <Link href="/dummy_rag_chat">
+        <Link href="/dummy_rag_chat?mode=manual">
           <Button>社内マニュアルQ&A</Button>
         </Link>
-        <Link href="/dummy_rag_chat">
+        <Link href="/dummy_rag_chat?mode=skill">
           <Button>スキルナレッジ検索</Button>
         </Link>
       </div>

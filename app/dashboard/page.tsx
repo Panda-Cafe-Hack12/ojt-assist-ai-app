@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { createClient } from '@/utils/supabase/server'
 // import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
+import GoogleFirstAuth  from '@/components/GoogleFirstAuth';
 // import SignOutButton from "@/components/SignOutButton";
 
 export default async function DashboardPage() {
@@ -15,16 +16,42 @@ export default async function DashboardPage() {
   }
 
   return (
-    <div className="flex flex-col items-center justify-center h-screen">
+    <div className="flex flex-col items-center h-screen gap-8">
       <h2 className="text-xl font-bold mb-4">ダッシュボード</h2>
       {/* <h1>Welcome to the Dashboard</h1> */}
       {/* <SignOutButton /> */}
-      <div className="space-y-2">
-        <Link href="/product/register">
-          <Button>商品登録ページへ</Button>
+      <div className="mt-4 flex justify-center gap-4">
+        {/* <GoogleFirstAuth/> */}
+        <Link href="/api/auth/gdrive">
+          <Button>Google Drive 初回認証</Button>
         </Link>
-        <Link href="/product/list">
-          <Button>商品一覧ページへ</Button>
+        <Link href="/dummy_gdrive">
+          <Button>Google Drive 接続テスト</Button>
+        </Link>
+      </div>
+      <div className="mt-4 flex justify-center gap-4">
+        <Link href="/dummy_rag_chat">
+          <Button>社内マニュアルQ&A</Button>
+        </Link>
+        <Link href="/dummy_rag_chat">
+          <Button>スキルナレッジ検索</Button>
+        </Link>
+      </div>
+      <div className="mt-4 flex justify-center gap-4">
+        <Link href="/dummy_product/register">
+          <Button>商品登録テスト</Button>
+        </Link>
+        <Link href="/dummy_product/list">
+          <Button>商品一覧テスト</Button>
+        </Link>
+        <Link href="/edge_test">
+          <Button>エッジ関数テスト</Button>
+        </Link>
+        <Link href="/mock_test">
+          <Button>モックテスト</Button>
+        </Link>
+        <Link href="/dashboard/organizations">
+          <Button>組織登録ページへ</Button>
         </Link>
       </div>
     </div>

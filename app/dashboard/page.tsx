@@ -6,12 +6,37 @@ import { createClient } from '@/utils/supabase/server'
 import { redirect } from 'next/navigation';
 import GoogleFirstAuth  from '@/components/GoogleFirstAuth';
 // import SignOutButton from "@/components/SignOutButton";
+import { User } from '../types/user';
+
+async function getUserInfo(supabasePromise: ReturnType<typeof createClient>, email: string): Promise<User | null> {
+  const supabase = await supabasePromise;
+
+  const { data, error } = await supabase
+    .rpc('get_user_login', { user_email: email })
+    .single(); 
+
+  if (error) {
+    console.error('ユーザー情報の取得に失敗しました:', error);
+    return null;
+  }
+  
+  return data as User;
+}
 
 export default async function DashboardPage() {
 
-  const supabase = await createClient()
-  const { data, error } = await supabase.auth.getUser()
-  if (error || !data?.user) {
+  const supabasePromise = createClient()
+  const supabase = await supabasePromise;
+  const { data: { user }, error } = await supabase.auth.getUser()
+  if (error || !user) {
+    redirect('/')
+  }
+  
+  // ログイン時、クライアントは一度取得してcontextに保存済みだけど、
+  // サーバーサイドは毎回DBから取得する
+  const userEmail = user.email ?? ''; 
+  const userData = await getUserInfo(supabasePromise, userEmail);
+  if (!userData) {
     redirect('/')
   }
 
@@ -30,10 +55,10 @@ export default async function DashboardPage() {
         </Link>
       </div>
       <div className="mt-4 flex justify-center gap-4">
-        <Link href="/dummy_rag_chat">
+        <Link href="/dummy_rag_chat?mode=manual">
           <Button>社内マニュアルQ&A</Button>
         </Link>
-        <Link href="/dummy_rag_chat">
+        <Link href="/dummy_rag_chat?mode=skill">
           <Button>スキルナレッジ検索</Button>
         </Link>
       </div>
@@ -50,9 +75,12 @@ export default async function DashboardPage() {
         <Link href="/mock_test">
           <Button>モックテスト</Button>
         </Link>
-        <Link href="/dashboard/organizations">
-          <Button>組織登録ページへ</Button>
-        </Link>
+        { userData.role_id === 1 && (
+          <Link href="/dashboard/organizations">
+            <Button>組織登録ページへ</Button>
+          </Link>
+        )}
+        
       </div>
     </div>
   );

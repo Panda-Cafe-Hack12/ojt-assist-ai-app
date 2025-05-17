@@ -1,11 +1,13 @@
 import DeployButton from "@/components/deploy-button";
 import { EnvVarWarning } from "@/components/env-var-warning";
 import HeaderAuth from "@/components/header-auth";
+import HeaderTest from "@/components/HeaderTest";
 import { ThemeSwitcher } from "@/components/theme-switcher";
 import { hasEnvVars } from "@/utils/supabase/check-env-vars";
 import { Geist } from "next/font/google";
 import { ThemeProvider } from "next-themes";
 import Link from "next/link";
+import { AuthProvider } from './contexts/AuthContext'; // AuthProvider をインポート
 import "./globals.css";
 
 const defaultUrl = process.env.VERCEL_URL
@@ -31,6 +33,7 @@ export default function RootLayout({
   return (
     <html lang="en" className={geistSans.className} suppressHydrationWarning>
       <body className="bg-background text-foreground">
+        <AuthProvider>
         <ThemeProvider
           attribute="class"
           defaultTheme="system"
@@ -47,7 +50,9 @@ export default function RootLayout({
                       <DeployButton />
                     </div>
                   </div> */}
-                  {!hasEnvVars ? <EnvVarWarning /> : <HeaderAuth />}
+                  <HeaderAuth />
+                  {/* <HeaderTest /> */}
+                  {/* {!hasEnvVars ? <EnvVarWarning /> : <HeaderAuth />} */}
                 </div>
               </nav>
               <div className="flex flex-col gap-20 max-w-5xl p-5">
@@ -55,7 +60,7 @@ export default function RootLayout({
               </div>
 
               <footer className="w-full flex items-center justify-center border-t mx-auto text-center text-xs gap-8 py-16">
-                <p>
+                {/* <p>
                   Powered by{" "}
                   <a
                     href="https://supabase.com/?utm_source=create-next-app&utm_medium=template&utm_term=nextjs"
@@ -65,12 +70,13 @@ export default function RootLayout({
                   >
                     Supabase
                   </a>
-                </p>
+                </p> */}
                 <ThemeSwitcher />
               </footer>
             </div>
           </main>
         </ThemeProvider>
+        </AuthProvider>
       </body>
     </html>
   );

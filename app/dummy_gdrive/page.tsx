@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
+import { useAuth } from '../contexts/AuthContext';
 
 type ResFileMetaData = {
   files: FileMetaData[];
@@ -23,8 +24,8 @@ export default function DummyGdrivePage() {
   const [syncing, setSyncing] = useState(false);
   const [syncError, setSyncError] = useState<string | null>(null);
   const [syncSuccess, setSyncSuccess] = useState(false);
-
-
+  const { user } = useAuth();
+  
   const fetchMetaDatas = async () => {
     setLoadingFiles(true);
     setFetchFilesError(null);

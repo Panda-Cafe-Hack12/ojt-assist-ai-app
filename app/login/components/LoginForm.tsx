@@ -5,6 +5,8 @@ import { useRouter } from 'next/navigation';
 // import { createClient } from '@supabase/ssr';
 import { createClient } from '@/utils/supabase/client';
 import { SupabaseClient } from '@supabase/supabase-js';
+import { useAuth } from '../../contexts/AuthContext';
+import { User } from '../../types/user';
 
 interface LoginFormProps {}
 
@@ -15,6 +17,7 @@ export default function LoginForm({}: LoginFormProps) {
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
   const [supabase, setSupabase] = useState<SupabaseClient | null>(null);
+  const { login } = useAuth();
 
   useEffect(() => {
     const initializeSupabase = async () => {
@@ -52,8 +55,26 @@ export default function LoginForm({}: LoginFormProps) {
       if (error) {
         setError(error.message);
       } else {
-        router.push('/dashboard');
-      }
+     
+        // 実際のAPIエンドポイントにリクエストを送信
+        const response = await fetch('/api/login', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ email }),
+        });
+
+        if (!response.ok) {
+          const data = await response.json();
+          throw new Error(data.message || 'ログインに失敗しました');
+        }
+
+        const userData: User = await response.json(); 
+
+        login(userData); // グローバルな状態を更新
+        router.push('/dashboard'); // ログイン成功後にダッシュボードへリダイレクト
+      }       
     } catch (err: any) {
       setError('ログインに失敗しました');
       console.error('Login error:', err);

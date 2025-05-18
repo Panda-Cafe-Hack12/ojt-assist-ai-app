@@ -151,7 +151,7 @@ export default async function DashboardPage() {
   // ログイン時、クライアントは一度取得してcontextに保存済みだけど、
   // サーバーサイドは毎回DBから取得する
   const userEmail = user.email ?? ''; 
-  const { data: { session } } = await supabase.auth.getSession();
+  // const { data: { session } } = await supabase.auth.getSession();
 
   if (user?.user_metadata) {
     console.log('ユーザー名:', user.user_metadata.user_name);

@@ -5,7 +5,7 @@ export type User = {
   organization_id: string;
   department_id: number;
   role_id: number; 
-  training_template_id: number;
+  training_data_id: number;
   organization_name: string;
   department_name: string;
 };

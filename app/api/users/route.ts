@@ -1,6 +1,12 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/utils/supabase/server';
 // import { sendMail } from '@/utils/sendMail'; // メール送信ユーティリティ（仮）
+import { createClient as supabaseClient } from '@supabase/supabase-js';
+
+const supabase = supabaseClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+);
 
 export async function POST(request: Request) {
   try {
@@ -11,7 +17,6 @@ export async function POST(request: Request) {
       return NextResponse.json({ message: '必須項目が不足しています' }, { status: 400 });
     }
 
-    const supabase = await createClient();
     const { error } = await supabase.from('users').insert([
       {
         name,
@@ -35,5 +40,23 @@ export async function POST(request: Request) {
     return NextResponse.json({ message: '登録が完了しました。メールを送信しました。' }, { status: 201 });
   } catch (error) {
     return NextResponse.json({ message: '登録処理でエラーが発生しました' }, { status: 500 });
+  }
+}
+
+export async function GET() {
+  try {
+    const { data, error } = await supabase
+      .from('users')
+      .select('*');
+
+    if (error) throw error;
+
+    return NextResponse.json(data);
+  } catch (error) {
+    console.error('Users fetch error:', error);
+    return NextResponse.json(
+      { error: 'Failed to fetch users' },
+      { status: 500 }
+    );
   }
 }

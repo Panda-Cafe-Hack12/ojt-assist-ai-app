@@ -13,6 +13,9 @@ type FileMetaData = {
   id: string;
   name: string;
   mimeType: string;
+  description: string;
+  modifiedTime: string;
+  size: number;
 }
 
 export default function DummyGdrivePage() {
@@ -24,6 +27,9 @@ export default function DummyGdrivePage() {
   const [syncing, setSyncing] = useState(false);
   const [syncError, setSyncError] = useState<string | null>(null);
   const [syncSuccess, setSyncSuccess] = useState(false);
+  const [folderId, setFolderId] = useState('');
+  const [files, setFiles] = useState<FileMetaData[]>([]);
+  const [error, setError] = useState('');
   const { user } = useAuth();
   
   const fetchMetaDatas = async () => {
@@ -110,6 +116,29 @@ export default function DummyGdrivePage() {
       setSyncError(error.message || 'フォルダ同期中にエラーが発生しました。');
     } finally {
       setSyncing(false);
+    }
+  };
+
+  const handleSpecifyFolderGetFiles = async () => {
+    setError('');
+    setFiles([]);
+
+    if (!folderId) {
+      setError('Folder ID is required.');
+      return;
+    }
+
+    try {
+      const response = await fetch(`/api/gdrive/specify-folder?folderId=${folderId}`);
+      if (!response.ok) {
+        const data = await response.json();
+        setError(data.error || 'Failed to fetch files.');
+        return;
+      }
+      const data = await response.json();
+      setFiles(data.files);
+    } catch (e: any) {
+      setError(e.message || 'An unexpected error occurred.');
     }
   };
 
@@ -202,6 +231,31 @@ export default function DummyGdrivePage() {
         {syncing ? '同期中...' : '同期'}
         {syncError && <p className="text-red-500 mt-2">{syncError}</p>}
         {syncSuccess && <p className="text-green-500 mt-2">フォルダの同期が完了しました。</p>}
+      </div>
+
+      <div>
+        <input
+          type="text"
+          placeholder="Enter Folder ID"
+          value={folderId}
+          onChange={(e) => setFolderId(e.target.value)}
+        />
+        <button onClick={handleSpecifyFolderGetFiles}>Get Files</button>
+
+        {error && <p style={{ color: 'red' }}>Error: {error}</p>}
+
+        {files.length > 0 && (
+          <ul>
+            {files.map((file) => (
+              <li key={file.id}>
+                <strong>{file.name}</strong> ({file.id})<br />
+                Description: {file.description}<br />
+                Last Modified: {new Date(file.modifiedTime).toLocaleString()}<br />
+                Size: {file.size} bytes
+              </li>
+            ))}
+          </ul>
+        )}
       </div>
     </div>
   );

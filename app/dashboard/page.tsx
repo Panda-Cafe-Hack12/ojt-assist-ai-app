@@ -205,9 +205,14 @@ export default async function DashboardPage() {
           <Button>モックテスト</Button>
         </Link>
         { userData.role_id === 1 && (
-          <Link href="/dashboard/organizations">
-            <Button>組織登録ページへ</Button>
-          </Link>
+          <>
+            <Link href="/dashboard/organizations">
+              <Button>組織登録ページへ</Button>
+            </Link>
+            <Link href="/dashboard/curriculum">
+              <Button>カリキュラムテンプレート作成</Button>
+            </Link>
+          </>
         )}
         
       </div>

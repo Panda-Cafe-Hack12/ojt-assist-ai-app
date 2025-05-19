@@ -205,9 +205,14 @@ export default async function DashboardPage() {
           <Button>モックテスト</Button>
         </Link>
         { userData.role_id === 1 && (
+          <div className="flex justify-center gap-4">
           <Link href="/dashboard/organizations">
-            <Button>組織登録ページへ</Button>
+            <Button>組織設定</Button>
           </Link>
+          <Link href="/users/register">
+            <Button>社員登録</Button>
+          </Link>
+          </div>
         )}
         
       </div>

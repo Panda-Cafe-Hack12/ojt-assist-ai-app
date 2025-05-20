@@ -22,4 +22,36 @@ export async function GET() {
       { status: 500 }
     );
   }
+}
+
+export async function PUT(request: Request) {
+  try {
+    const body = await request.json();
+    // 不要なフィールドを除外
+    const {
+      id: _,
+      created_at,
+      updated_at,
+      required_documents,
+      ...insertFields
+    } = body;
+
+    // required_documentsは空でセット
+    insertFields.required_documents = null;
+
+    const { data, error } = await supabase
+      .from('training_templates')
+      .insert([insertFields])
+      .select();
+
+    if (error) throw error;
+
+    return NextResponse.json(data[0], { status: 201 });
+  } catch (error) {
+    console.error('Template insert error:', error);
+    return NextResponse.json(
+      { error: 'テンプレートの作成に失敗しました' },
+      { status: 500 }
+    );
+  }
 } 

@@ -1,5 +1,6 @@
 'use client';
 
+import { randomInt } from 'crypto';
 import { useState, useEffect } from 'react';
 import type { ChangeEvent } from 'react';
 
@@ -13,6 +14,9 @@ interface Department {
 interface File {
   id: string;
   name: string;
+  description: string;
+  modifiedTime: string;
+  size: number;
 }
 
 interface Goal {
@@ -21,6 +25,7 @@ interface Goal {
 }
 
 interface Evaluation {
+  id: string;
   goals: Goal[];
   message: string;
 }
@@ -48,17 +53,18 @@ export default function CurriculumTemplateCreator() {
     if (selectedDepartment) {
       const department = departments.find(d => d.name === selectedDepartment);
       if (department) {
-        fetch(`/api/files?folderId=${department.folder_id}`)
-          .then(res => res.json())
-          .then(data => setFiles(data))
-          .catch(error => console.error('ファイル一覧の取得に失敗しました:', error));
+        (async () => {
+          const res = await fetch(`/api/gdrive/specify-folder?folderId=${department.folder_id}`);
+          const data = await res.json();
+          setFiles(data.files);
+        })().catch(error => console.error('ファイル一覧の取得に失敗しました:', error));
       }
     }
   }, [selectedDepartment, departments]);
 
   const handleGenerateCurriculum = async () => {
     try {
-      const response = await fetch('/api/generate-curriculum', {
+      const response = await fetch('/api/dummy-generate-curriculum', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -78,14 +84,13 @@ export default function CurriculumTemplateCreator() {
     if (!evaluation) return;
 
     try {
-      await fetch('/api/save-template', {
-        method: 'POST',
+      await fetch('/api/templates', {
+        method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          department: selectedDepartment,
-          selectedFiles,
-          ojtDays: parseInt(ojtDays),
-          goals: evaluation.goals
+          name: selectedDepartment + '_' + parseInt(ojtDays) + 'Days plan',
+          department_id: departments.find(d => d.name === selectedDepartment)?.id,
+          period: parseInt(ojtDays)
         })
       });
       alert('保存が完了しました');

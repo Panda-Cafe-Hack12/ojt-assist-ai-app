@@ -36,6 +36,12 @@ const ChatScreen: React.FC<ChatProps> = ({ messages, onSendMessage, mode }) => {
         <div className="flex flex-col h-screen bg-gray-100 p-4">
             <div className="flex-grow overflow-y-auto mb-4 p-4 bg-white rounded-lg shadow-md" ref={chatContainerRef}>
                 {messages.map((msg, index) => (
+                    <React.Fragment key={index}>
+        {msg.role === 'assistant' && (
+          <div className="mb-2">
+            <h2 className="text-sm font-semibold text-gray-700">AIアシスタント</h2>
+          </div>
+        )}
                     <div key={index} className={`mb-2 flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                         <div className={`rounded-lg p-3 max-w-2xl break-words ${
                             msg.role === 'user' ? 'bg-blue-500 text-white' : 'bg-gray-300 text-gray-800'
@@ -44,12 +50,13 @@ const ChatScreen: React.FC<ChatProps> = ({ messages, onSendMessage, mode }) => {
                             {msg.role === 'assistant' &&
                              !msg.content.toLowerCase().includes('わかりません') &&
                              msg.sources && msg.sources.length > 0 && (
-                                <div className="mt-2 text-xs text-gray-500">
-                                    出典: {msg.sources.map(source => source.fileName).join(', ')}
+                                <div className="mt-2 text-sm text-gray-500">
+                                    参照元: {msg.sources.map(source => source.fileName).join(', ')}
                                 </div>
                             )}
                         </div>
                     </div>
+                    </React.Fragment>
                 ))}
             </div>
             <div className="bg-white rounded-lg shadow-md p-4 flex">

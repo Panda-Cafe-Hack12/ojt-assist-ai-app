@@ -50,8 +50,10 @@ export default async function AuthButton() {
   //   );
   // }
   return user ? (
-    <div className="flex items-center gap-4">
-      {user.email}!
+    <div className="flex justify-end items-center gap-4 w-full p-4">
+      <div> {user.user_metadata.department_name}</div>
+      <div> {user.user_metadata.user_name}</div>
+     
       <form action={signOutAction}>
         <Button type="submit" variant={"outline"}>
           Sign out

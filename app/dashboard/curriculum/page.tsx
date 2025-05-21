@@ -37,6 +37,7 @@ export default function CurriculumTemplateCreator() {
   const [selectedFiles, setSelectedFiles] = useState<string[]>([]);
   const [ojtDays, setOjtDays] = useState<string>('');
   const [evaluation, setEvaluation] = useState<Evaluation | null>(null);
+  const [isFormDisabled, setIsFormDisabled] = useState(false);
 
   useEffect(() => {
     // 部署データの取得
@@ -54,16 +55,32 @@ export default function CurriculumTemplateCreator() {
       const department = departments.find(d => d.name === selectedDepartment);
       if (department) {
         (async () => {
-          const res = await fetch(`/api/gdrive/specify-folder?folderId=${department.folder_id}`);
-          const data = await res.json();
-          setFiles(data.files);
-        })().catch(error => console.error('ファイル一覧の取得に失敗しました:', error));
+          try {
+            const res = await fetch(`/api/gdrive/specify-folder?folderId=${department.folder_id}`);
+            const data = await res.json();
+            if (data.files && data.files.length > 0) {
+              setFiles(data.files);
+            } else {
+              setFiles([]);
+              alert('ファイルを取得できませんでした');
+            }
+          } catch (error) {
+            console.error('ファイル一覧の取得に失敗しました:', error);
+            setFiles([]);
+            alert('ファイルを取得できませんでした');
+          }
+        })().catch(error => {
+          console.error('ファイル一覧の取得に失敗しました:', error);
+          setFiles([]);
+          alert('ファイルを取得できませんでした');
+        });
       }
     }
   }, [selectedDepartment, departments]);
 
   const handleGenerateCurriculum = async () => {
     try {
+      setIsFormDisabled(true);  // フォームを無効化
       const response = await fetch('/api/dummy-generate-curriculum', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -77,7 +94,12 @@ export default function CurriculumTemplateCreator() {
       setEvaluation(data);
     } catch (error) {
       console.error('カリキュラム生成に失敗しました:', error);
+      setIsFormDisabled(false);
     }
+  };
+
+  const handleReset = () => {
+    setIsFormDisabled(false);
   };
 
   const handleSave = async () => {
@@ -116,6 +138,7 @@ export default function CurriculumTemplateCreator() {
           className="w-full p-2 border rounded"
           value={selectedDepartment}
           onChange={(e) => setSelectedDepartment(e.target.value)}
+          disabled={isFormDisabled}
         >
           <option value="">部署を選択</option>
           {departments.map(dept => (
@@ -135,6 +158,8 @@ export default function CurriculumTemplateCreator() {
                     type="checkbox"
                     onChange={handleCheckboxChange(file.id)}
                     className="rounded"
+                    disabled={isFormDisabled}
+                    checked={selectedFiles.includes(file.id)}
                   />
                   <span>{file.name}</span>
                 </label>
@@ -151,16 +176,28 @@ export default function CurriculumTemplateCreator() {
             onChange={(e) => setOjtDays(e.target.value)}
             className="w-full p-2 border rounded"
             min="1"
+            disabled={isFormDisabled}
           />
         </div>
 
-        <button
-          onClick={handleGenerateCurriculum}
-          disabled={!selectedDepartment || selectedFiles.length === 0 || !ojtDays}
-          className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:bg-gray-400"
-        >
-          選択ファイルでカリキュラム作成
-        </button>
+        <div className="flex space-x-4">
+          <button
+            onClick={handleGenerateCurriculum}
+            disabled={!selectedDepartment || selectedFiles.length === 0 || !ojtDays || isFormDisabled}
+            className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:bg-gray-400"
+          >
+            選択ファイルでカリキュラム作成
+          </button>
+
+          {isFormDisabled && (
+            <button
+              onClick={handleReset}
+              className="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600"
+            >
+              再設定
+            </button>
+          )}
+        </div>
 
         {evaluation && (
           <div className="mt-4 p-4 border rounded">

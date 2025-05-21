@@ -7,7 +7,7 @@ type ButtonProps = React.ComponentProps<typeof Button>
 
 export function PrimaryButton({ children, className, ...props }: ButtonProps) {
   return (
-    <Button className={cn("bg-blue-600 hover:bg-blue-700 text-white", className)} {...props}>
+    <Button className={cn("bg-rose-400 hover:bg-rose-500 text-white", className)} {...props}>
       {children}
     </Button>
   )
@@ -15,7 +15,7 @@ export function PrimaryButton({ children, className, ...props }: ButtonProps) {
 
 export function SecondaryButton({ children, className, ...props }: ButtonProps) {
   return (
-    <Button className={cn("bg-gray-200 hover:bg-gray-300 text-gray-800", className)} {...props}>
+    <Button className={cn("bg-lavender-300 hover:bg-lavender-400 text-purple-800", className)} {...props}>
       {children}
     </Button>
   )
@@ -23,7 +23,7 @@ export function SecondaryButton({ children, className, ...props }: ButtonProps) 
 
 export function DangerButton({ children, className, ...props }: ButtonProps) {
   return (
-    <Button className={cn("bg-red-600 hover:bg-red-700 text-white", className)} {...props}>
+    <Button className={cn("bg-fuchsia-500 hover:bg-fuchsia-600 text-white", className)} {...props}>
       {children}
     </Button>
   )
@@ -31,7 +31,7 @@ export function DangerButton({ children, className, ...props }: ButtonProps) {
 
 export function SuccessButton({ children, className, ...props }: ButtonProps) {
   return (
-    <Button className={cn("bg-green-600 hover:bg-green-700 text-white", className)} {...props}>
+    <Button className={cn("bg-teal-400 hover:bg-teal-500 text-white", className)} {...props}>
       {children}
     </Button>
   )
@@ -39,7 +39,7 @@ export function SuccessButton({ children, className, ...props }: ButtonProps) {
 
 export function WarningButton({ children, className, ...props }: ButtonProps) {
   return (
-    <Button className={cn("bg-amber-500 hover:bg-amber-600 text-white", className)} {...props}>
+    <Button className={cn("bg-amber-300 hover:bg-amber-400 text-amber-800", className)} {...props}>
       {children}
     </Button>
   )
@@ -47,7 +47,7 @@ export function WarningButton({ children, className, ...props }: ButtonProps) {
 
 export function InfoButton({ children, className, ...props }: ButtonProps) {
   return (
-    <Button className={cn("bg-sky-500 hover:bg-sky-600 text-white", className)} {...props}>
+    <Button className={cn("bg-sky-300 hover:bg-sky-400 text-sky-800", className)} {...props}>
       {children}
     </Button>
   )
@@ -56,9 +56,73 @@ export function InfoButton({ children, className, ...props }: ButtonProps) {
 export function OutlineButton({ children, className, ...props }: ButtonProps) {
   return (
     <Button
-      className={cn("bg-transparent hover:bg-gray-50 text-gray-800 border border-gray-300", className)}
+      className={cn("bg-transparent hover:bg-pink-50 text-pink-500 border-2 border-pink-300", className)}
       {...props}
     >
+      {children}
+    </Button>
+  )
+}
+
+export function PastelPinkButton({ children, className, ...props }: ButtonProps) {
+  return (
+    <Button className={cn("bg-pink-200 hover:bg-pink-300 text-pink-800", className)} {...props}>
+      {children}
+    </Button>
+  )
+}
+
+export function PastelPurpleButton({ children, className, ...props }: ButtonProps) {
+  return (
+    <Button className={cn("bg-purple-200 hover:bg-purple-300 text-purple-800", className)} {...props}>
+      {children}
+    </Button>
+  )
+}
+
+export function PastelBlueButton({ children, className, ...props }: ButtonProps) {
+  return (
+    <Button className={cn("bg-blue-200 hover:bg-blue-300 text-blue-800", className)} {...props}>
+      {children}
+    </Button>
+  )
+}
+
+export function PastelGreenButton({ children, className, ...props }: ButtonProps) {
+  return (
+    <Button className={cn("bg-green-200 hover:bg-green-300 text-green-800", className)} {...props}>
+      {children}
+    </Button>
+  )
+}
+
+export function PastelYellowButton({ children, className, ...props }: ButtonProps) {
+  return (
+    <Button className={cn("bg-yellow-200 hover:bg-yellow-300 text-yellow-800", className)} {...props}>
+      {children}
+    </Button>
+  )
+}
+
+export function PastelPeachButton({ children, className, ...props }: ButtonProps) {
+  return (
+    <Button className={cn("bg-orange-200 hover:bg-orange-300 text-orange-800", className)} {...props}>
+      {children}
+    </Button>
+  )
+}
+
+export function MauveButton({ children, className, ...props }: ButtonProps) {
+  return (
+    <Button className={cn("bg-purple-300 hover:bg-purple-400 text-purple-800", className)} {...props}>
+      {children}
+    </Button>
+  )
+}
+
+export function LilacButton({ children, className, ...props }: ButtonProps) {
+  return (
+    <Button className={cn("bg-violet-300 hover:bg-violet-400 text-violet-800", className)} {...props}>
       {children}
     </Button>
   )
@@ -73,7 +137,7 @@ export function LoadingButton({
 }: ButtonProps & { isLoading?: boolean }) {
   return (
     <Button
-      className={cn("bg-blue-600 hover:bg-blue-700 text-white", className)}
+      className={cn("bg-rose-400 hover:bg-rose-500 text-white", className)}
       disabled={isLoading || disabled}
       {...props}
     >
@@ -92,7 +156,7 @@ export function LoadingDangerButton({
 }: ButtonProps & { isLoading?: boolean }) {
   return (
     <Button
-      className={cn("bg-red-600 hover:bg-red-700 text-white", className)}
+      className={cn("bg-fuchsia-500 hover:bg-fuchsia-600 text-white", className)}
       disabled={isLoading || disabled}
       {...props}
     >
@@ -111,7 +175,7 @@ export function LoadingSuccessButton({
 }: ButtonProps & { isLoading?: boolean }) {
   return (
     <Button
-      className={cn("bg-green-600 hover:bg-green-700 text-white", className)}
+      className={cn("bg-teal-400 hover:bg-teal-500 text-white", className)}
       disabled={isLoading || disabled}
       {...props}
     >
@@ -132,6 +196,14 @@ export function SmallButton({ children, className, ...props }: ButtonProps) {
 export function LargeButton({ children, className, ...props }: ButtonProps) {
   return (
     <Button className={cn("h-12 px-6 text-base", className)} size="lg" {...props}>
+      {children}
+    </Button>
+  )
+}
+
+export function RoundedButton({ children, className, ...props }: ButtonProps) {
+  return (
+    <Button className={cn("rounded-full", className)} {...props}>
       {children}
     </Button>
   )

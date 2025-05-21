@@ -1,6 +1,6 @@
 import { redirect } from 'next/navigation';
 // import { createServerClient } from '@supabase/ssr';
-import { createClient } from '@/utils/supabase/server';
+import { createClient } from '@/utils/supabase/server'
 import { cookies } from 'next/headers';
 import LoginForm from './components/LoginForm';
 import Link from 'next/link';
@@ -11,7 +11,7 @@ import { UserPlus } from "lucide-react";
 import LoginIllustration from "@/components/illustrations/login-illustration";
 
 export default async function LoginPage() {
-  const supabase = await createClient();
+  const supabase = await createClient()
   const { data: { session } } = await supabase.auth.getSession();
 
   if (session) {
@@ -20,7 +20,6 @@ export default async function LoginPage() {
 
   return (
     <div className="min-h-screen flex">
-      {/* Left Column - Illustration */}
       <div className="hidden md:block md:w-1/2 bg-indigo-900 p-6 flex-shrink-0">
         <div className="h-full flex flex-col justify-center items-center">
           <div className="text-center mb-8">

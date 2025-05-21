@@ -7,7 +7,7 @@ import { redirect } from 'next/navigation';
 import GoogleFirstAuth  from '@/components/GoogleFirstAuth';
 // import SignOutButton from "@/components/SignOutButton";
 import { User } from '../types/user';
-
+import { SuccessButton } from '@/components/button-components';
 type TrainingData = {
   end_date: string;
   period: number;
@@ -203,6 +203,9 @@ export default async function DashboardPage() {
         </Link>
         <Link href="/mock_test">
           <Button>モックテスト</Button>
+        </Link>
+        <Link href="/dashboard/demo">
+          <SuccessButton>ダッシュボード</SuccessButton>
         </Link>
         { userData.role_id === 1 && (
           <div className="flex justify-center gap-4">

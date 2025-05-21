@@ -17,7 +17,7 @@ export default function AssignCurriculum() {
 
   const fetchUsers = async () => {
     try {
-      const response = await fetch('/api/users');
+      const response = await fetch('/api/users/all');
       const data = await response.json();
       setUsers(data);
     } catch (error) {

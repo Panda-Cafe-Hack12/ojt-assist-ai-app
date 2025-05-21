@@ -215,6 +215,9 @@ export default async function DashboardPage() {
           <Link href="/dashboard/curriculum">
             <Button>カリキュラムテンプレート作成</Button>
           </Link>
+          <Link href="/dashboard/curriculum/assign">
+            <Button>カリキュラム割り当て</Button>
+          </Link>
           </div>
         )}
         

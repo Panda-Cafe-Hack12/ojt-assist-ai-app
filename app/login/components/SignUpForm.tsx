@@ -6,6 +6,11 @@ import { useRouter } from 'next/navigation';
 // import { createBrowserClient } from '@supabase/ssr'; // ブラウザ用クライアント
 import { createClient } from '@/utils/supabase/client';
 import { SupabaseClient } from '@supabase/supabase-js';
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { AlertCircle, Loader2, Mail, Lock } from "lucide-react";
 
 interface SignUpFormProps {
   onSignUpSuccess: () => void;
@@ -73,47 +78,56 @@ export default function SignUpForm({ onSignUpSuccess }: SignUpFormProps) {
   return (
     <form onSubmit={handleSignUp} className="space-y-4">
       {error && (
-        <div
-          className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4"
-          role="alert"
-        >
-          <strong className="font-bold">エラー!</strong>
-          <span className="block sm:inline">{error}</span>
-        </div>
+         <Alert variant="destructive" className="animate-in fade-in-50">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
       )}
-      <div>
-        <label htmlFor="email" className="block text-gray-700 text-sm font-bold mb-2">
-          メールアドレス
-        </label>
-        <input
-          type="email"
-          id="email"
-          className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-          value={email}
-          onChange={handleEmailChange}
-          required
-        />
+      <div className="space-y-2">
+        <Label htmlFor="email">メールアドレス</Label>
+        <div className="relative">
+          <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+          <Input
+            id="email"
+            type="email"
+            placeholder="your@email.com"
+            className="pl-10"
+            value={email}
+            onChange={handleEmailChange}
+            required
+          />
+        </div>
       </div>
-      <div>
-        <label htmlFor="password" className="block text-gray-700 text-sm font-bold mb-2">
-          パスワード
-        </label>
-        <input
-          type="password"
-          id="password"
-          className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-          value={password}
-          onChange={handlePasswordChange}
-          required
-        />
+      <div className="space-y-2">
+        <Label htmlFor="password">パスワード</Label>
+        <div className="relative">
+          <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+          <Input
+            id="password"
+            type="password"
+            className="pl-10"
+            value={password}
+            onChange={handlePasswordChange}
+            required
+          />
+        </div>
       </div>
-      <button
-        type="submit"
-        className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline w-full"
-        disabled={loading || !supabase}
-      >
-        {loading ? '登録中...' : '新規登録'}
-      </button>
+      <div className="pt-2">
+        <Button
+          type="submit"
+          className="w-full bg-gradient-to-r from-emerald-600 to-blue-600 hover:from-emerald-700 hover:to-blue-700"
+          disabled={loading || !supabase}
+        >
+          {loading ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              登録中...
+            </>
+          ) : (
+            "登録"
+          )}
+        </Button>
+      </div>
     </form>
   );
 }

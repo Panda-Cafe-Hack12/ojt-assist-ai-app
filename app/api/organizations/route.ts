@@ -28,7 +28,32 @@ export async function POST(request: Request) {
 export async function GET() {
   try {
     const supabase = await createClient();
-    const { data, error } = await supabase.from('organizations').select('id, name');
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    if (userError || !user) {
+      console.error('ユーザー情報の取得に失敗しました:', userError);
+      return null;
+    }
+
+    const { data: profile, error: profileError } = await supabase
+    .from('users')
+    .select('id, organization_id')
+    .eq('auth_id', user.id)
+    .single();
+  
+    console.log("ユーザープロフィールを取得: ");
+    console.log(profile);
+
+    if (profileError || !profile) {
+      console.error('ユーザープロフィールの取得に失敗しました:', profileError);
+      return null;
+    }
+
+    const { data, error } = await supabase
+    .from('organizations')
+    .select('id, name, manual_knowledge_repo, skill_knowledge_repo, is_delete')
+    .eq('id', profile.organization_id)
+    .single();
+    console.log("組織情報を取得 組織名: " + data?.name);
     if (error) {
       return NextResponse.json({ message: '取得に失敗しました: ' + error.message }, { status: 500 });
     }

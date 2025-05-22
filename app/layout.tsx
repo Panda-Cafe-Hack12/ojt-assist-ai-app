@@ -7,8 +7,9 @@ import { hasEnvVars } from "@/utils/supabase/check-env-vars";
 import { Geist } from "next/font/google";
 import { ThemeProvider } from "next-themes";
 import Link from "next/link";
-import { AuthProvider } from "./contexts/AuthContext"; // AuthProvider をインポート
+import { AuthProvider } from "./contexts/AuthContext";
 import "./globals.css";
+import { HamburgerMenu } from "@/components/hamburger-menu";
 
 const defaultUrl = process.env.VERCEL_URL
   ? `https://${process.env.VERCEL_URL}`
@@ -53,6 +54,44 @@ export default function RootLayout({
                       </Link>
                     </div>
                     <HeaderAuth />
+                    <div className="flex items-center gap-4">
+                      <HamburgerMenu
+                        items={[
+                          {
+                            href: "/api/auth/gdrive",
+                            label: "Google Drive 初回認証",
+                          },
+                          {
+                            href: "/dummy_gdrive",
+                            label: "Google Drive 接続テスト",
+                          },
+                          {
+                            href: "/dummy_rag_chat?mode=manual",
+                            label: "社内マニュアルQ&A",
+                          },
+                          {
+                            href: "/dummy_rag_chat?mode=skill",
+                            label: "スキルナレッジ検索",
+                          },
+                          {
+                            href: "/dummy_product/register",
+                            label: "商品登録テスト",
+                          },
+                          {
+                            href: "/dummy_product/list",
+                            label: "商品一覧テスト",
+                          },
+                          { href: "/edge_test", label: "エッジ関数テスト" },
+                          { href: "/mock_test", label: "モックテスト" },
+                          {
+                            href: "/dashboard/demo",
+                            label: "ダッシュボード",
+                            variant: "success",
+                          },
+                        ]}
+                        isAdmin={false}
+                      />
+                    </div>
                   </div>
                 </nav>
                 <div className="flex flex-col gap-8 max-w-5xl p-5 w-full">
@@ -60,17 +99,6 @@ export default function RootLayout({
                 </div>
 
                 <footer className="w-full flex items-center justify-center border-t mx-auto text-center text-xs gap-8 py-16">
-                  {/* <p>
-                  Powered by{" "}
-                  <a
-                    href="https://supabase.com/?utm_source=create-next-app&utm_medium=template&utm_term=nextjs"
-                    target="_blank"
-                    className="font-bold hover:underline"
-                    rel="noreferrer"
-                  >
-                    Supabase
-                  </a>
-                </p> */}
                   <ThemeSwitcher />
                 </footer>
               </div>

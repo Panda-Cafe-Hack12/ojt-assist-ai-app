@@ -1,17 +1,18 @@
-import { Button } from '@/components/ui/button';
-import Link from 'next/link';
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
 // import { createServerClient } from '@supabase/ssr';
-import { createClient } from '@/utils/supabase/server'
+import { createClient } from "@/utils/supabase/server";
 // import { cookies } from 'next/headers';
-import { redirect } from 'next/navigation';
-import GoogleFirstAuth  from '@/components/GoogleFirstAuth';
+import { redirect } from "next/navigation";
+import GoogleFirstAuth from "@/components/GoogleFirstAuth";
 // import SignOutButton from "@/components/SignOutButton";
-import { User } from '../types/user';
-import { SuccessButton } from '@/components/button-components';
+import { User } from "../types/user";
+import { SuccessButton } from "@/components/button-components";
+import { HamburgerMenu } from "@/components/hamburger-menu";
 type TrainingData = {
   end_date: string;
   period: number;
-}
+};
 
 type ViewedData = {
   file_name: string;
@@ -19,32 +20,35 @@ type ViewedData = {
   viewed_count: number;
   viewed_page: number;
   total_page: number;
-}
+};
 
 type SearchData = {
   category: string;
   search_count: number;
-}
+};
 
 type DataSet = {
   end_date: string;
   remain_day: number;
   viewed_data: ViewedData[];
   search_data: SearchData[];
-}
+};
 
-async function getUserInfo(supabasePromise: ReturnType<typeof createClient>, email: string): Promise<User | null> {
+async function getUserInfo(
+  supabasePromise: ReturnType<typeof createClient>,
+  email: string
+): Promise<User | null> {
   const supabase = await supabasePromise;
 
   const { data, error } = await supabase
-    .rpc('get_user_login', { user_email: email })
-    .single(); 
+    .rpc("get_user_login", { user_email: email })
+    .single();
 
   if (error) {
-    console.error('ユーザー情報の取得に失敗しました:', error);
+    console.error("ユーザー情報の取得に失敗しました:", error);
     return null;
   }
-  
+
   return data as User;
 }
 
@@ -66,12 +70,15 @@ function calculateRemainingDays(endDateString: string): number {
   return remainingDays;
 }
 
-async function getChartData(supabasePromise: ReturnType<typeof createClient>, userId: string): Promise<DataSet | null> {
+async function getChartData(
+  supabasePromise: ReturnType<typeof createClient>,
+  userId: string
+): Promise<DataSet | null> {
   const supabase = await supabasePromise;
 
   // const { data: training, error: trainingError } = await supabase
   // .rpc('get_training_data', { user_id: userId })
-  // .single(); 
+  // .single();
 
   // if (trainingError) {
   //   console.error('トレーニングデータの取得に失敗しました:', trainingError);
@@ -85,7 +92,7 @@ async function getChartData(supabasePromise: ReturnType<typeof createClient>, us
   // const { end_date, period } = training as TrainingData;
   // const { data: viewed, error: viewedError } = await supabase
   //   .rpc('get_viewed_data', { user_id: userId })
-  //   .single(); 
+  //   .single();
 
   // if (viewedError) {
   //   console.error('閲覧履歴の取得に失敗しました:', viewedError);
@@ -94,7 +101,7 @@ async function getChartData(supabasePromise: ReturnType<typeof createClient>, us
 
   // const { data: search, error: searchError } = await supabase
   //   .rpc('get_search_data', { user_id: userId })
-  //   .single(); 
+  //   .single();
 
   // if (searchError) {
   //   console.error('検索履歴の取得に失敗しました:', searchError);
@@ -114,19 +121,49 @@ async function getChartData(supabasePromise: ReturnType<typeof createClient>, us
   console.log(`end_date までの残り日数: ${remaining} 日`);
 
   const dummyViewedData: ViewedData[] = [
-    { file_name: 'ファイル1', level: 1, viewed_count: 5, viewed_page: 10, total_page: 20 },
-    { file_name: 'ファイル2', level: 2, viewed_count: 3, viewed_page: 8, total_page: 15 },
-    { file_name: 'ファイル3', level: 3, viewed_count: 7, viewed_page: 12, total_page: 25 },
-    { file_name: 'ファイル4', level: 4, viewed_count: 7, viewed_page: 24, total_page: 36 },
-    { file_name: 'ファイル5', level: 5, viewed_count: 12, viewed_page: 34, total_page: 48 },
+    {
+      file_name: "ファイル1",
+      level: 1,
+      viewed_count: 5,
+      viewed_page: 10,
+      total_page: 20,
+    },
+    {
+      file_name: "ファイル2",
+      level: 2,
+      viewed_count: 3,
+      viewed_page: 8,
+      total_page: 15,
+    },
+    {
+      file_name: "ファイル3",
+      level: 3,
+      viewed_count: 7,
+      viewed_page: 12,
+      total_page: 25,
+    },
+    {
+      file_name: "ファイル4",
+      level: 4,
+      viewed_count: 7,
+      viewed_page: 24,
+      total_page: 36,
+    },
+    {
+      file_name: "ファイル5",
+      level: 5,
+      viewed_count: 12,
+      viewed_page: 34,
+      total_page: 48,
+    },
   ];
 
   const dummySearchData: SearchData[] = [
-    { category: 'AWS', search_count: 5 }, 
-    { category: 'CI/CD', search_count: 3 },
-    { category: 'コンテナ', search_count: 7 },
-    { category: 'Bash', search_count: 2 },
-    { category: 'ネットワーク基礎', search_count: 8 },  
+    { category: "AWS", search_count: 5 },
+    { category: "CI/CD", search_count: 3 },
+    { category: "コンテナ", search_count: 7 },
+    { category: "Bash", search_count: 2 },
+    { category: "ネットワーク基礎", search_count: 8 },
   ];
 
   const dataset: DataSet = {
@@ -134,35 +171,37 @@ async function getChartData(supabasePromise: ReturnType<typeof createClient>, us
     remain_day: remaining,
     viewed_data: dummyViewedData,
     search_data: dummySearchData,
-  }
-  
+  };
+
   return dataset;
 }
 
 export default async function DashboardPage() {
-
-  const supabasePromise = createClient()
+  const supabasePromise = createClient();
   const supabase = await supabasePromise;
-  const { data: { user }, error } = await supabase.auth.getUser()
+  const {
+    data: { user },
+    error,
+  } = await supabase.auth.getUser();
   if (error || !user) {
-    redirect('/')
+    redirect("/");
   }
-  
+
   // ログイン時、クライアントは一度取得してcontextに保存済みだけど、
   // サーバーサイドは毎回DBから取得する
-  const userEmail = user.email ?? ''; 
+  const userEmail = user.email ?? "";
   // const { data: { session } } = await supabase.auth.getSession();
 
   if (user?.user_metadata) {
-    console.log('ユーザー名:', user.user_metadata.user_name);
-    console.log('組織名:', user.user_metadata.organization_name);
+    console.log("ユーザー名:", user.user_metadata.user_name);
+    console.log("組織名:", user.user_metadata.organization_name);
   } else {
-    console.log('セッションにメタデータがありません');
+    console.log("セッションにメタデータがありません");
   }
 
   const userData = await getUserInfo(supabasePromise, userEmail);
   if (!userData) {
-    redirect('/')
+    redirect("/");
   }
 
   const dataSet = await getChartData(supabasePromise, userData.id);
@@ -192,38 +231,23 @@ export default async function DashboardPage() {
         </Link>
       </div>
       <div className="mt-4 flex justify-center gap-4">
-        <Link href="/dummy_product/register">
-          <Button>商品登録テスト</Button>
-        </Link>
-        <Link href="/dummy_product/list">
-          <Button>商品一覧テスト</Button>
-        </Link>
-        <Link href="/edge_test">
-          <Button>エッジ関数テスト</Button>
-        </Link>
-        <Link href="/mock_test">
-          <Button>モックテスト</Button>
-        </Link>
-        <Link href="/dashboard/demo">
-          <SuccessButton>ダッシュボード</SuccessButton>
-        </Link>
-        { userData.role_id === 1 && (
-          <div className="flex justify-center gap-4">
-          <Link href="/dashboard/organizations">
-            <Button>組織設定</Button>
+        <div className="flex gap-4">
+          <Link href="/dummy_product/register">
+            <Button>商品登録テスト</Button>
           </Link>
-          <Link href="/users/register">
-            <Button>社員登録</Button>
+          <Link href="/dummy_product/list">
+            <Button>商品一覧テスト</Button>
           </Link>
-          <Link href="/dashboard/curriculum">
-            <Button>カリキュラムテンプレート作成</Button>
+          <Link href="/edge_test">
+            <Button>エッジ関数テスト</Button>
           </Link>
-          <Link href="/dashboard/curriculum/assign">
-            <Button>カリキュラム割り当て</Button>
+          <Link href="/mock_test">
+            <Button>モックテスト</Button>
           </Link>
-          </div>
-        )}
-        
+          <Link href="/dashboard/demo">
+            <SuccessButton>ダッシュボード</SuccessButton>
+          </Link>
+        </div>
       </div>
     </div>
   );

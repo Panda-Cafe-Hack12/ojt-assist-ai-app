@@ -54,10 +54,6 @@ export function HamburgerMenu({ items, isAdmin = false }: HamburgerMenuProps) {
         { href: "/mock_test", label: "モックテスト" },
       ],
     },
-    {
-      title: "ダッシュボード",
-      items: [{ href: "/dashboard/demo", label: "ダッシュボード" }],
-    },
   ];
 
   return (

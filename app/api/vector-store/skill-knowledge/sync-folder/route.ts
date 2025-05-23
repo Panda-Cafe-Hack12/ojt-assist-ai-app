@@ -6,7 +6,7 @@ import { Readable } from 'stream';
 import { getValidAccessToken } from '@/utils/googleAuth'; 
 import { OpenAI } from 'openai'; 
 import { getEmbeddings } from "../../_utils/embeddings"; 
-import { getFileContentFromDrive } from "../../_utils/getFromDrive"; 
+import { RtnSkillContent, getFileContentFromSkillDrive } from "../../_utils/getFromDrive"; 
 import mammoth from 'mammoth';
 import * as XLSX from 'xlsx';
 
@@ -22,6 +22,9 @@ const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 const googleClientId = process.env.GOOGLE_CLIENT_ID;
 const googleClientSecret = process.env.GOOGLE_CLIENT_SECRET;
 const openAIApiKey = process.env.OPENAI_API_KEY; 
+
+// OpenAIクライアントの初期化
+const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 // テキストをエンベディングに変換する関数 
 async function getEmbeddings2(text: string): Promise<number[] | null> {
@@ -56,8 +59,19 @@ async function getEmbeddings2(text: string): Promise<number[] | null> {
 async function getFileContentFromDrive2(drive: any, fileId: string, mimeType: string): Promise<string | null> {
     try {
       console.log("ファイルダウンロード...");
+      
+
 
       if (mimeType === 'application/vnd.google-apps.document') {
+        // Googleドキュメントを一度PDFとしてエクスポート
+        // const exportResponse = await drive.files.export({
+        //   fileId: fileId,
+        //   mimeType: 'application/pdf',
+        // } as any);
+        // const pdfBuffer = Buffer.from(await exportResponse.data.arrayBuffer());
+        // pageCount = await calculatePdfPageCount(pdfBuffer);
+
+
           const res = await drive.files.export({
               fileId: fileId,
               mimeType: 'text/plain',
@@ -147,46 +161,81 @@ async function processGoogleDriveFolder(supabase: ReturnType<typeof createClient
     console.log(`フォルダ "${folderId}" を処理中...`);
     const { data } = await drive.files.list({
       q: `'${folderId}' in parents and trashed=false${latestSyncTime ? ` and modifiedTime > '${latestSyncTime}'` : ''}`,           
-      fields: 'files(id, name, mimeType, modifiedTime)',
+      fields: 'files(id, name, mimeType, modifiedTime, parents, description)',
     });
 
     console.log("フォルダ取得！");
     console.log(data);
 
     if (!data.files || data.files.length === 0) {
-      console.log(`フォルダ "${folderId}" に更新されたファイルはありませんでした。`);
-      return { latestProcessedFileTime, processedFilesCount, error: null };
+      errorMsg = `フォルダ "${folderId}" にファイル、もしくは更新されたファイルはありませんでした。`;
+      console.log(errorMsg);
+      return { latestProcessedFileTime, processedFilesCount, error: errorMsg };
     }
 
+    
     for (const file of data.files) {
       const fileModifiedTime = file.modifiedTime;
       if (latestProcessedFileTime === null || new Date(fileModifiedTime) > new Date(latestProcessedFileTime)) {
           latestProcessedFileTime = fileModifiedTime;
       }
 
+      let category = '';
+
       if (file.mimeType !== 'application/vnd.google-apps.folder') {
-        const content = await getFileContentFromDrive(drive, file.id!, file.mimeType!);
+        //  詳細の要約文から生成AIにカテゴリ名を回答してもらう
+        if (file.description) {          
+          const completion = await openai.chat.completions.create({
+            model: 'gpt-4o-mini',
+            messages: [
+              { role: 'system', content: '与えられた要約文から、内容を最もよく表す10文字以内のカテゴリ名を一つ生成してください。' },
+              { role: 'user', content: file.description },
+            ],
+          });
+
+          category = completion.choices[0]?.message?.content?.trim() || '';
+          if (category.length > 10) {
+            category = category.substring(0, 10); // 10文字以内の制限
+          }
+          
+        } else {
+          category = '要約文なし';
+        }
+        console.log("カテゴリ名: " + category);
+
+        const rtnSkillContent = await getFileContentFromSkillDrive(drive, file.id!, file.mimeType!);
         console.log("取得ファイルcontent");
-        console.log(content);
-        if (content) {
-          const embeddings = await getEmbeddings(content); 
+        console.log(rtnSkillContent);
+        if (rtnSkillContent) {
+          const embeddings = await getEmbeddings(rtnSkillContent.content); 
           if (embeddings && embeddings.length === 512) {
             const metadata = {
               source: 'google_drive',
               file_id: file.id,
               file_name: file.name,
               folder_id: folderId,
+              description: file.description,
+              mime_type: file.mimeType,
               last_modified: fileModifiedTime,
               created_at: new Date().toISOString(),
               updated_at: new Date().toISOString(),
             };
-            await supabaseResolve.rpc('upsert_manual_document', { // upsert を使用
+
+            console.log('Google Drive から取得したファイルのメタデータ:');
+            console.log(metadata);
+
+            // スキルのドキュメントをベクトルDBに upsert する
+            const resStoreVector = await supabaseResolve.rpc('upsert_skill_document', { // upsert を使用
                 p_document_id: file.id,
-                p_new_content: content,
+                p_folder_id: folderId,
+                p_category: category,
+                p_page_count: rtnSkillContent.pageCount === 0 ? null : rtnSkillContent.pageCount,
+                p_new_content: rtnSkillContent.content,
                 p_new_embedding: embeddings,
-                p_new_metadata: metadata,
+                p_new_metadata: metadata,     
             });
             console.log(`ファイル "${file.name}" (${file.id}) のエンベディングを格納/更新しました。`);
+            console.log(resStoreVector);
             processedFilesCount++;
 
             // await storeEmbeddings(supabase, content, embeddings, metadata);
@@ -270,6 +319,7 @@ export async function POST(request: Request) {
       .select('latest_updated_file_time')
       .eq('user_id', profile.id)
       .eq('drive_folder_id', folderPath)
+      .eq('folder?type', 'skill')
       .eq('status', "success")
       .order('synced_at', { ascending: false })
       .limit(1)
@@ -292,7 +342,7 @@ export async function POST(request: Request) {
           processed_files_count: processResult.processedFilesCount,
           latest_updated_file_time: processResult.latestProcessedFileTime,
           drive_folder_id: folderPath,
-          folder_type: 'manual',
+          folder_type: 'skill',
       });
 
     if (logError) {

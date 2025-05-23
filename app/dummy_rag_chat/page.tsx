@@ -28,7 +28,7 @@ const DummyRagChatPage = (props: ChatProps) => {
   useEffect(() => {
     console.log("mode: ", knowledge);
     // コンポーネントがマウントされたときに最初のメッセージを追加
-    const firstMessage = knowledge === 'manual' ? '何かお困りですか？なんでもご質問ください' : '技術資料の検索を開始しますか？';
+    const firstMessage = knowledge === 'manual' ? '社内マニュアルを検索します。なんでもご質問ください' : '社内技術資料を検索をします。なんでもご質問ください';
     setChatMessages([{ role: 'assistant', content: firstMessage }]);
   }, []);
 
@@ -45,6 +45,7 @@ const DummyRagChatPage = (props: ChatProps) => {
 
     try {
       if(knowledge === 'manual') {
+        // マニュアル検索の場合
         const response = await fetch('/api/dummy-rag-chat/manual-knowledge', {
           method: 'POST',
           headers: {
@@ -58,14 +59,36 @@ const DummyRagChatPage = (props: ChatProps) => {
           // setAnswer(data.answer);
           // setSources(data.sources || []);
           // setQuestion('');
-          setChatMessages(prevMessages => [...prevMessages, { role: 'assistant', content: data.answer, sources: data.sources }]);
+          const resMessage = data.answer === "わかりません。" ? 'すみません。その質問について回答できるマニュアルは見つかりませんでした。' : data.answer;
+
+          setChatMessages(prevMessages => [...prevMessages, { role: 'assistant', content: resMessage, sources: data.sources }]);
         } else {
           console.error('チャット送信に失敗しました。');
           setChatMessages(prevMessages => [...prevMessages, { role: 'assistant', content: "エラーが発生しました。" }]);
           // setAnswer('エラーが発生しました。');
         }
       } else {
+        // スキルナレッジ検索の場合
+        const response = await fetch('/api/dummy-rag-chat/skill-knowledge', {
+          method: 'POST',
+          headers: {
+              'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ question: newMessage, userId, sessionId }),
+        });
 
+        if (response.ok) {
+          const data = await response.json();
+          // setAnswer(data.answer);
+          // setSources(data.sources || []);
+          // setQuestion('');
+          const resMessage = data.answer === "わかりません。" ? 'すみません。そのスキルについて回答できる社内資料は見つかりませんでした。' : data.answer;
+          setChatMessages(prevMessages => [...prevMessages, { role: 'assistant', content: resMessage, sources: data.sources }]);
+        } else {
+          console.error('チャット送信に失敗しました。');
+          setChatMessages(prevMessages => [...prevMessages, { role: 'assistant', content: "エラーが発生しました。" }]);
+          // setAnswer('エラーが発生しました。');
+        }
       }
 
     } catch (error) {

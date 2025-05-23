@@ -46,9 +46,10 @@ const ChatScreen: React.FC<ChatProps> = ({ messages, onSendMessage, mode }) => {
                         <div className={`rounded-lg p-3 max-w-2xl break-words ${
                             msg.role === 'user' ? 'bg-blue-500 text-white' : 'bg-gray-300 text-gray-800'
                         }`}>
+                            
                             <p className="text-sm">{msg.content}</p>
                             {msg.role === 'assistant' &&
-                             !msg.content.toLowerCase().includes('わかりません') &&
+                             !msg.content.toLowerCase().includes('すみません。そのスキルについて回答できる社内資料は見つかりませんでした。') && !msg.content.toLowerCase().includes('すみません。その質問について回答できるマニュアルは見つかりませんでした。') && 
                              msg.sources && msg.sources.length > 0 && (
                                 <div className="mt-2 text-sm text-gray-500">
                                     参照元: {msg.sources.map(source => source.fileName).join(', ')}

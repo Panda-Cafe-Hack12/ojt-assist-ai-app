@@ -94,6 +94,8 @@ export default function DummyGdrivePage() {
     setSyncing(true);
     setSyncError(null);
     setSyncSuccess(false);
+    console.log('スキルナレッジフォルダ同期開始');
+    console.log(skillfolderPath);
 
     try {
       const response = await fetch('/api/vector-store/skill-knowledge/sync-folder', {

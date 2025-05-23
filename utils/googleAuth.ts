@@ -57,7 +57,7 @@ async function getValidAccessToken(userId: string): Promise<string | null> {
   const now = new Date();
 
   // 有効期限が切れているか、まもなく切れる場合（念のため少し余裕を持たせる）
-  if (expiryDate < now || (expiryDate.getTime() - now.getTime()) < (3600000)) { // 1時間以内
+  if (expiryDate < now || (expiryDate.getTime() - now.getTime()) < (600000)) { // 1時間以内
     console.log('アクセストークンの有効期限切れ、またはまもなく期限切れ。リフレッシュします。');
     const oauth2Client = new google.auth.OAuth2(googleClientId, googleClientSecret);
     oauth2Client.setCredentials({

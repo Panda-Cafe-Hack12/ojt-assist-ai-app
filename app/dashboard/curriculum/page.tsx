@@ -20,8 +20,11 @@ interface File {
 }
 
 interface Goal {
+  fileId: string;
   fileName: string;
   goalLevel: number;
+  pageCount: number;
+  difficulty: string;
 }
 
 interface Evaluation {
@@ -30,13 +33,29 @@ interface Evaluation {
   message: string;
 }
 
+interface EvaluationDetail {
+  folderId: string;
+  goals: Goal[];
+  message: string;
+}
+
+interface Document {
+  fileId: string;
+  fileName: string;
+  level: number | null;
+  difficulty: string | null;
+  message: string | null;
+  pageCount: number | null;
+  description: string | null;
+}
+
 export default function CurriculumTemplateCreator() {
   const [departments, setDepartments] = useState<Department[]>([]);
   const [selectedDepartment, setSelectedDepartment] = useState<string>('');
   const [files, setFiles] = useState<File[]>([]);
   const [selectedFiles, setSelectedFiles] = useState<string[]>([]);
   const [ojtDays, setOjtDays] = useState<string>('');
-  const [evaluation, setEvaluation] = useState<Evaluation | null>(null);
+  const [evaluation, setEvaluation] = useState<EvaluationDetail | null>(null);
   const [isFormDisabled, setIsFormDisabled] = useState(false);
 
   useEffect(() => {
@@ -98,6 +117,43 @@ export default function CurriculumTemplateCreator() {
     }
   };
 
+  const handleEvaluateCurriculum = async () => {
+    try {
+      setIsFormDisabled(true);  // フォームを無効化
+      const department = departments.find(d => d.name === selectedDepartment);
+      const response = await fetch('/api/gdrive/evaluate-curriculum', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          folderId: department?.folder_id,
+          fileIds: selectedFiles,
+          period: parseInt(ojtDays)
+        })
+      });
+      const data: {documents: Document[], overallEvaluation: string} = await response.json();
+      const goals: Goal[] = [];
+      data.documents.map((doc) => {
+        const goal: Goal = {
+          fileId: doc.fileId,
+          fileName: doc.fileName,
+          goalLevel: doc.level ? doc.level : 0,
+          pageCount: doc.pageCount ? doc.pageCount : 0,
+          difficulty: doc.difficulty ? doc.difficulty : "",
+        }; 
+        goals.push(goal);
+      });
+      const evaluation: EvaluationDetail = {
+        folderId: department?.folder_id ? department?.folder_id: "" ,
+        goals: goals,
+        message: data.overallEvaluation
+      };
+      setEvaluation(evaluation);
+    } catch (error) {
+      console.error('カリキュラム生成に失敗しました:', error);
+      setIsFormDisabled(false);
+    }
+  };
+  
   const handleReset = () => {
     setIsFormDisabled(false);
   };
@@ -182,7 +238,7 @@ export default function CurriculumTemplateCreator() {
 
         <div className="flex space-x-4">
           <button
-            onClick={handleGenerateCurriculum}
+            onClick={handleEvaluateCurriculum}
             disabled={!selectedDepartment || selectedFiles.length === 0 || !ojtDays || isFormDisabled}
             className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:bg-gray-400"
           >
@@ -205,15 +261,54 @@ export default function CurriculumTemplateCreator() {
             <p className="mb-4 text-yellow-600">{evaluation.message}</p>
             
             <h4 className="font-bold mb-2">目標レベル</h4>
-            <div className="space-y-2">
+            {/* <div className="space-y-2">
               {evaluation.goals.map((goal, index) => (
                 <div key={index} className="flex justify-between">
                   <span>{goal.fileName}</span>
-                  <span>レベル {goal.goalLevel}</span>
+                  <span>level: {goal.goalLevel}</span>
+                  <span>{goal.pageCount}ページ</span>
                 </div>
               ))}
-            </div>
+            </div> */}
 
+            <div className="overflow-x-auto">
+              <table className="min-w-full leading-normal">
+                <thead className="bg-gray-100">
+                  <tr>
+                    <th className="px-5 py-3 border-b-2 border-gray-200 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                      ファイル名
+                    </th>
+                    <th className="px-5 py-3 border-b-2 border-gray-200 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                      レベル
+                    </th>
+                    <th className="px-5 py-3 border-b-2 border-gray-200 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                      難易度
+                    </th>
+                    <th className="px-5 py-3 border-b-2 border-gray-200 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                      ページ数
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {evaluation.goals.map((goal, index) => (
+                    <tr key={index}>
+                      <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
+                        {goal.fileName}
+                      </td>
+                      <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
+                        {goal.goalLevel}
+                      </td>
+                      <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
+                        {goal.difficulty}
+                      </td>
+                      <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
+                        {goal.pageCount} ページ
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
             <button
               onClick={handleSave}
               className="mt-4 px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"

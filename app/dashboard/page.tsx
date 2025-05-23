@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Card,
   CardContent,
@@ -25,8 +25,12 @@ import { SearchHistoryChart } from "@/components/search-history-chart";
 import { FileViewTable } from "@/components/file-view-table";
 import { CategorySearchTable } from "@/components/category-search-table";
 import { SearchInput } from "@/components/SearchInput";
+import { useAuth } from "../contexts/AuthContext";
+import { useRouter } from 'next/navigation';
 
 export default function DashboardPage() {
+  const { user } = useAuth();
+  const router = useRouter();
   // This would come from your API in a real implementation
   const ojtData = {
     ojtPeriod: "2025/5/1 - 2025/6/30",
@@ -81,6 +85,15 @@ export default function DashboardPage() {
     { categoryName: "ネットワーク基礎", searchCount: 10 },
     { categoryName: "CI/CD", searchCount: 24 },
   ];
+
+  useEffect(() => {
+    // 何らかの条件に基づいてリフレッシュを行う
+    const shouldRefresh = true; // 例: ログイン直後など
+
+    if (shouldRefresh) {
+      router.refresh();
+    }
+  }, []); // 空の依存配列で初回レンダリング時のみ実行
 
   // State for search functionality
   const [searchTerm, setSearchTerm] = useState("");

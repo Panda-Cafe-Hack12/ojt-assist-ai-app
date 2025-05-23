@@ -15,6 +15,8 @@ async function getValidAccessToken(userId: string): Promise<string | null> {
 
   const supabaseAnon = createClient(supabaseUrl, supabaseAnonKey);
 
+  let newValidAccessToken = "";
+  console.log("アクセストークン処理開始: " + userId);
   // ユーザーの Google トークン情報を取得
   const { data: profile, error: profileError } = await supabaseAnon
     .from('users')
@@ -27,7 +29,7 @@ async function getValidAccessToken(userId: string): Promise<string | null> {
     return null;
   }
 
-  let { gdrive_access_token, gdrive_refresh_token, gdrive_token_expiry } = profile;
+  const { gdrive_access_token, gdrive_refresh_token, gdrive_token_expiry } = profile;
 
   // アクセストークンを復号化
   const { data: decryptedAccessTokenData, error: decryptAccessTokenError } = await supabaseAnon.rpc('decrypt_token', { encrypted_token: gdrive_access_token });
@@ -51,11 +53,11 @@ async function getValidAccessToken(userId: string): Promise<string | null> {
     return null;
   }
 
-  const expiryDate = new Date(gdrive_token_expiry * 1000);
+  const expiryDate = new Date(gdrive_token_expiry );
   const now = new Date();
 
   // 有効期限が切れているか、まもなく切れる場合（念のため少し余裕を持たせる）
-  if (expiryDate < now || (expiryDate.getTime() - now.getTime()) < (5 * 60 * 1000)) { // 5分以内
+  if (expiryDate < now || (expiryDate.getTime() - now.getTime()) < (3600000)) { // 1時間以内
     console.log('アクセストークンの有効期限切れ、またはまもなく期限切れ。リフレッシュします。');
     const oauth2Client = new google.auth.OAuth2(googleClientId, googleClientSecret);
     oauth2Client.setCredentials({
@@ -65,15 +67,36 @@ async function getValidAccessToken(userId: string): Promise<string | null> {
     try {
       const { credentials } = await oauth2Client.refreshAccessToken();
       if (credentials && credentials.access_token && credentials.expiry_date) {
-        const newAccessTokenEncrypted = await supabaseAnon.rpc('encrypt_token', { raw_token: credentials.access_token });
+        const newExpiryDate = credentials.expiry_date ? new Date(credentials.expiry_date).toISOString() : null;
+        newValidAccessToken = credentials.access_token;
+
+        // 新しいアクセストークンと有効期限をデータベースに保存
+      // const { error: updateError } = await supabaseAnon.rpc('encrypt_and_store_tokens', {
+      //   user_id: id, // public.users の id を使用
+      //   access_token: newAccessToken,
+      //   refresh_token: decryptedRefreshTokenData,
+      //   expiry: newExpiryDate, // expiry_date を Date オブジェクトに変換
+      // });
+
+      // if (updateError) {
+      //   console.error('アクセストークンの更新に失敗しました:', updateError);
+      //   return null;
+      // }
+
+        const newAccessTokenEncrypted = await supabaseAnon.rpc('encrypt_token', { token: credentials.access_token });
+
+        console.log("新しいアクセストークンを暗号化: ");
+        console.log(newAccessTokenEncrypted);
+
         if (newAccessTokenEncrypted && newAccessTokenEncrypted.data) {
-          const newExpiryTime = Math.floor(credentials.expiry_date / 1000);
+         
+          // const newExpiryTime = Math.floor(credentials.expiry_date / 1000);
           // 新しいアクセストークンと有効期限を DB に保存
           const { error: updateError } = await supabaseAnon
             .from('users')
             .update({
               gdrive_access_token: newAccessTokenEncrypted.data,
-              gdrive_token_expiry: newExpiryTime,
+              gdrive_token_expiry: newExpiryDate,
             })
             .eq('auth_id', userId);
 
@@ -95,9 +118,12 @@ async function getValidAccessToken(userId: string): Promise<string | null> {
       console.error('アクセストークンのリフレッシュ中にエラーが発生しました:', error.message);
       return null;
     }
+  } else {
+    // 有効期限が切れていない場合は復号化したアクセストークンをそのまま返す
+    newValidAccessToken = decryptedAccessTokenData;
   }
 
-  return decryptedAccessTokenData; // 有効な場合はそのまま返す
+  return newValidAccessToken; // 有効な場合はそのまま返す
 }
 
 export { getValidAccessToken };

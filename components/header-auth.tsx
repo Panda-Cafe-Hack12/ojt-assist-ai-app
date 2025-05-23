@@ -12,6 +12,8 @@ export default async function AuthButton() {
     data: { user },
   } = await supabase.auth.getUser();
 
+  console.log("ヘッダー作成");
+  console.log(user);
 
   // if (!hasEnvVars) {
   //   return (

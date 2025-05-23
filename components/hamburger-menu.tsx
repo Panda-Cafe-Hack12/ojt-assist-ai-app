@@ -26,11 +26,20 @@ interface MenuGroup {
 interface HamburgerMenuProps {
   items: MenuItem[];
   isAdmin?: boolean;
+  isAuth?: boolean;
 }
 
-export function HamburgerMenu({ items, isAdmin = false }: HamburgerMenuProps) {
+export function HamburgerMenu({ items, isAdmin = false, isAuth = false }: HamburgerMenuProps) {
   // メニュー項目を機能ごとにグループ化
+  if(!isAuth) return null;
+
   const menuGroups: MenuGroup[] = [
+    {
+      title: "メニュー",
+      items: [
+        { href: "/dashboard", label: "ダッシュボード" },
+      ],
+    },
     {
       title: "Google Drive",
       items: [

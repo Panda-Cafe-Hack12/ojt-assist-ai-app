@@ -38,9 +38,9 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: '有効なアクセストークンを取得できませんでした。' }, { status: 401 });
     }
 
-      const oauth2Client = new google.auth.OAuth2(googleClientId, googleClientSecret);
-      oauth2Client.setCredentials({ access_token: accessToken });
-      const drive = google.drive({ version: 'v3', auth: oauth2Client });
+    const oauth2Client = new google.auth.OAuth2(googleClientId, googleClientSecret);
+    oauth2Client.setCredentials({ access_token: accessToken });
+    const drive = google.drive({ version: 'v3', auth: oauth2Client });
 
     // const auth = new google.auth.GoogleAuth({
     //   keyFile: process.env.GOOGLE_DRIVE_CREDENTIALS_PATH, // 環境変数に認証情報ファイルのパスを設定
@@ -50,6 +50,8 @@ export async function GET(request: Request) {
     // const authClient = await auth.getClient();
     // google.options({ auth: authClient });
 
+    console.log('ファイル一覧取得 folderID:' + folderId);
+
     const res = await drive.files.list({
       q: `'${folderId}' in parents and trashed = false`,
       fields: 'files(id, name, description, modifiedTime, size)',
@@ -57,6 +59,18 @@ export async function GET(request: Request) {
       // driveId: folderId, // フォルダIDを driveId にも指定 (共有ドライブの場合)
       // corpora: 'drive',   // 検索対象を共有ドライブまたはマイドライブに指定 (driveId があれば共有ドライブ優先)
     });
+  
+
+    console.log(res.data);
+    if(!res.data || !res.data.files) {
+      console.error('ファイル一覧の取得に失敗しました。');
+      return NextResponse.json({ error: 'ファイル一覧の取得に失敗しました。' }, { status: 500 });
+    }
+
+    if(res.data.files.length === 0) {
+      console.error('ファイルがありませんでした。');
+      return NextResponse.json({ files: [] }, { status: 200 });
+    }
 
     const files = res.data.files?.map(file => ({
       id: file.id,

@@ -10,6 +10,7 @@ import Link from "next/link";
 import { AuthProvider } from "./contexts/AuthContext";
 import "./globals.css";
 import { HamburgerMenu } from "@/components/hamburger-menu";
+import { createClient } from "@/utils/supabase/server";
 
 const defaultUrl = process.env.VERCEL_URL
   ? `https://${process.env.VERCEL_URL}`
@@ -26,11 +27,20 @@ const geistSans = Geist({
   subsets: ["latin"],
 });
 
-export default function RootLayout({
+
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+    const supabase = await createClient();
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  console.log("user: ");
+  console.log(user);
   return (
     <html lang="en" className={geistSans.className} suppressHydrationWarning>
       <body className="bg-background text-foreground">
@@ -89,7 +99,8 @@ export default function RootLayout({
                             variant: "success",
                           },
                         ]}
-                        isAdmin={false}
+                        isAdmin={user?.user_metadata?.role_id === 1 ? true : false}
+                        isAuth={user ? true : false}
                       />
                     </div>
                   </div>
